@@ -21,7 +21,7 @@ services:
       # - Mounting custom addons
       - /opt/odoo/custom-addons/odoo-18-ce:/mnt/extra-addons
       # - Mounting enterprise addons
-      - /opt/odoo/server/odoo-18-ee/odoo/addons:/mnt/odoo-18-ee
+      - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
       # - replacing default conf file with custom conf file
       - ./conf:/etc/odoo
     command: >
@@ -50,7 +50,7 @@ services:
       - ./conf/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
     ports:
-      - "80:80"
+      - "8080:80"
       - "443:443"
     depends_on:
       - odoo
