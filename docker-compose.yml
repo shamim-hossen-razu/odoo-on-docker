@@ -3,7 +3,6 @@ services:
     image: postgres:latest
     container_name: postgres-container
     environment:
-      POSTGRES_DB: mydatabase
       POSTGRES_USER: shamim
       POSTGRES_PASSWORD: shamim
     volumes:
@@ -16,19 +15,17 @@ services:
     container_name: odoo-enterprise
     depends_on:
       - db
-    environment:
-      - HOST=db
-      - USER=shamim
-      - PASSWORD=shamim
-      - ODOO_DB_NAME=mydatabase
     ports:
       - "8069:8069"
     volumes:
+      # - Mounting custom addons
       - /opt/odoo/custom-addons/odoo-18-ce:/mnt/extra-addons
+      # - Mounting enterprise addons
       - /opt/odoo/server/odoo-18-ee/odoo/addons:/mnt/odoo-18-ee
+      # - replacing default conf file with custom conf file
       - ./conf:/etc/odoo
     command: >
-      odoo --config=/etc/odoo/odoo.conf -d mydatabase -i base,P1705_VendorBid,admin_reset
+      odoo -d mydatabase -i base,P1705_VendorBid,admin_reset
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -45,6 +42,7 @@ services:
       - ./pgadmin/servers.json:/pgadmin4/servers.json
       - ./pgadmin/pgpass:/pgpass
     restart: always
+
   nginx:
     image: nginx:latest
     container_name: nginx-proxy
