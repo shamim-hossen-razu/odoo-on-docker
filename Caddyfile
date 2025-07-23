@@ -7,3 +7,9 @@ pgadmin.myodootest.space {
     reverse_proxy pgadmin4:5050
     encode gzip
 }
+
+demo.myodootest.space {
+    reverse_proxy odoo-new:8069
+    encode gzip
+}
+

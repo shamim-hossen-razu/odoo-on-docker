@@ -27,6 +27,22 @@ services:
     command: >
       odoo -d mydatabase -i base,P1705_VendorBid,admin_reset
 
+  odoo-new:
+    build:
+      context: .
+      dockerfile: odoo.dockerfile
+    container_name: odoo-enterprise-new
+    depends_on:
+      - db
+    ports:
+      - "8070:8069"  # Different port from original odoo
+    volumes:
+      - /opt/odoo/custom-addons/odoo-18-ce:/mnt/extra-addons
+      - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
+      - ./conf:/etc/odoo
+    command: >
+      odoo -d newdatabase1 -i base
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin4
@@ -62,3 +78,7 @@ volumes:
   pgadmin_data:
   caddy_data:
   caddy_config:
+
+# networks:
+#   shared_net:
+#     external: true
