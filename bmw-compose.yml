@@ -1,0 +1,20 @@
+services:
+  odoo-bmw:
+    image: odoo:18
+    container_name: bmw-container
+    # If any third party module has package dependency then uncomment the following 
+    # build:
+    #   context: ./dockerfile
+    #   dockerfile: mitsubishi.dockerfile
+    volumes:
+      - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
+      - /opt/odoo/custom-addons/odoo-18ee-custom-addons:/mnt/extra-addons
+      - ./conf/bmw.conf:/etc/odoo/odoo.conf
+    command: >
+      odoo -d bmw-db -i base,admin_reset
+    networks:
+      - odoo-net
+
+networks:
+  odoo-net:
+    external: true

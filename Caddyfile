@@ -1,9 +1,14 @@
-myodootest.space {
+bjit.myodootest.space {
     reverse_proxy odoo-admin-18ee:8069
     encode gzip
 }
 
 bmw.myodootest.space {
     reverse_proxy odoo-bmw:8069
+    encode gzip
+}
+
+mitsubishi.myodootest.space {
+    reverse_proxy odoo-mitsubishi:8069
     encode gzip
 }

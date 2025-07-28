@@ -7,6 +7,9 @@ services:
       POSTGRES_PASSWORD: shamim
     volumes:
       - odoo_db_data:/var/lib/postgresql/data
+    networks:
+      - odoo-net
+
   # Container name must same as service name and conf file name
   odoo-admin-18ee:
     build:
@@ -19,32 +22,15 @@ services:
       - HOST=db
       - USER=shamim
       - PASSWORD=shamim
-    ports:
-      - "8069:8069"
     volumes:
-      # - Mounting custom addons
       - /opt/odoo/custom-addons/odoo-18ee-custom-addons:/mnt/extra-addons
-      # - Mounting enterprise addons
       - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
-      # - replacing default conf file with custom conf file
-      - ./conf/odoo.conf:/etc/odoo/odoo.conf
+      - ./conf/bjit.conf:/etc/odoo/odoo.conf
     command: >
-      odoo -d admin-db -i base,P1705_VendorBid,admin_reset
-  
-  odoo-bmw:
-    image: odoo:18
-    container_name: bmw-container
-    depends_on:
-      - db
-    ports:
-      - "8069:8069"
-    volumes:
-      # - Mounting enterprise addons
-      - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
-      # - replacing default conf file with custom conf file
-      - ./conf/bmw.conf:/etc/odoo/odoo.conf
-    command: >
-      odoo -d bmw-db -i base
+      odoo -d bjit-odoo-db -i base,admin_reset,website
+    networks:
+      - odoo-net
+
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -61,6 +47,8 @@ services:
       - ./pgadmin/servers.json:/pgadmin4/servers.json
       - ./pgadmin/pgpass:/pgpass
     restart: always
+    networks:
+      - odoo-net
 
   caddy:
     image: caddy:latest
@@ -75,8 +63,14 @@ services:
     depends_on:
       - odoo-admin-18ee
       - pgadmin
-      - odoo-bmw
     restart: always
+    networks:
+      - odoo-net
+
+networks:
+  odoo-net:
+    name: odoo-net
+    driver: bridge
 
 volumes:
   odoo_db_data:
