@@ -7,41 +7,44 @@ services:
       POSTGRES_PASSWORD: shamim
     volumes:
       - odoo_db_data:/var/lib/postgresql/data
-
-  odoo:
+  # Container name must same as service name and conf file name
+  odoo-admin-18ee:
     build:
-      context: .
-      dockerfile: odoo.dockerfile
-    container_name: odoo-enterprise
+      context: ./dockerfile
+      dockerfile: odoo-admin-18ee.dockerfile
+    container_name: odoo-admin-18ee
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - USER=shamim
+      - PASSWORD=shamim
+    ports:
+      - "8069:8069"
+    volumes:
+      # - Mounting custom addons
+      - /opt/odoo/custom-addons/odoo-18ee-custom-addons:/mnt/extra-addons
+      # - Mounting enterprise addons
+      - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
+      # - replacing default conf file with custom conf file
+      - ./conf/odoo.conf:/etc/odoo/odoo.conf
+    command: >
+      odoo -d admin-db -i base,P1705_VendorBid,admin_reset
+  
+  odoo-bmw:
+    image: odoo:18
+    container_name: bmw-container
     depends_on:
       - db
     ports:
       - "8069:8069"
     volumes:
-      # - Mounting custom addons
-      - /opt/odoo/custom-addons/odoo-18-ce:/mnt/extra-addons
       # - Mounting enterprise addons
       - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
       # - replacing default conf file with custom conf file
-      - ./conf:/etc/odoo
+      - ./conf/bmw.conf:/etc/odoo/odoo.conf
     command: >
-      odoo -d mydatabase -i base,P1705_VendorBid,admin_reset
-
-  odoo-new:
-    build:
-      context: .
-      dockerfile: odoo.dockerfile
-    container_name: odoo-enterprise-new
-    depends_on:
-      - db
-    ports:
-      - "8070:8069"  # Different port from original odoo
-    volumes:
-      - /opt/odoo/custom-addons/odoo-18-ce:/mnt/extra-addons
-      - /opt/odoo/server/odoo_18.0+e/odoo/addons:/mnt/odoo-18-ee
-      - ./conf:/etc/odoo
-    command: >
-      odoo -d newdatabase1 -i base
+      odoo -d bmw-db -i base
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -58,6 +61,7 @@ services:
       - ./pgadmin/servers.json:/pgadmin4/servers.json
       - ./pgadmin/pgpass:/pgpass
     restart: always
+
   caddy:
     image: caddy:latest
     container_name: caddy-proxy
@@ -69,8 +73,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - odoo
+      - odoo-admin-18ee
       - pgadmin
+      - odoo-bmw
     restart: always
 
 volumes:
@@ -78,7 +83,3 @@ volumes:
   pgadmin_data:
   caddy_data:
   caddy_config:
-
-# networks:
-#   shared_net:
-#     external: true
